@@ -1,10 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using DiscordStarBot.Database;
-using Microsoft.EntityFrameworkCore;
 
-using System.Threading.Channels;
+using DiscordStarBot.Database;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace DiscordStarBot
 {
@@ -63,30 +63,6 @@ namespace DiscordStarBot
                     break;
             }
         }
-
-        //internal static async Task RegisterCommands(DiscordSocketClient client)
-        //{
-        //    var cmd = new SlashCommandBuilder()
-        //        .WithName(Set_Channel)
-        //        .WithDescription("Set specific channel as starboard")
-        //        .WithDescriptionLocalizations( new Dictionary<string, string>()
-        //        {
-        //            ["ru"] = "Назначить канал как доску почета"
-        //        })
-        //        .AddOption("channel", ApplicationCommandOptionType.Channel, "Channel to post starboard messages", isRequired: true);
-
-        //    await client.CreateGlobalApplicationCommandAsync(cmd.Build());
-
-
-        //    cmd = new SlashCommandBuilder().WithName(Set_Threshold)
-        //        .WithDescription("How many stars required to be posted")
-        //        .WithDescriptionLocalizations(new Dictionary<string, string>()
-        //        {
-        //            ["ru"] = "Установить сколько звезд нужно для закрепа"
-        //        })
-        //        .AddOption("count", ApplicationCommandOptionType.Integer, "How many reactions required", isRequired: true, minValue: 1);
-        //    await client.CreateGlobalApplicationCommandAsync(cmd.Build());
-        //}
 
         async Task<ConfigModel> GetConfig(ulong guildId)
         {

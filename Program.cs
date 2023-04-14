@@ -5,19 +5,15 @@ using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
 
-using DiscordStarBot;
 using DiscordStarBot.Database;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Reflection;
-using System.Text.Encodings.Web;
 
 var oatoken = "";
 const string Star_Code = @"⭐";
-const string To_Message_Str = "К сообщению";
-//await Commands.RegisterCommands(null);
 
 if (!File.Exists(".secret") || 
     string.IsNullOrEmpty(oatoken = File.ReadAllText(".secret").Trim()))
@@ -37,8 +33,8 @@ await db.Database.EnsureCreatedAsync();
 
 var client = new DiscordSocketClient(new DiscordSocketConfig()
 {
-    //GatewayIntents = GatewayIntents.GuildEmojis | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMessages |
-    //                 GatewayIntents.MessageContent | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions,
+    GatewayIntents = GatewayIntents.GuildEmojis | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMessages |
+                     GatewayIntents.MessageContent | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions,
 });
 
 var commands = new CommandService(new CommandServiceConfig() { });
@@ -56,7 +52,6 @@ AppDomain.CurrentDomain.ProcessExit += async (_, _) =>
     cts.Cancel();
 };
 
-//client.SlashCommandExecuted += OnSlashCommand;
 client.ReactionAdded += OnReaction;
 client.ReactionRemoved += OnReaction;
 client.Log += Log;
@@ -84,7 +79,6 @@ client.InteractionCreated += async (x) =>
 };
 client.Ready += async () =>
 {
-    //await Commands.RegisterCommands(client);
     var mod = await interaction.RegisterCommandsGloballyAsync(true);
 };
 
@@ -237,66 +231,6 @@ async Task<MessageModel> GetRestMessageEntry(ulong msgId, RestUserMessage msg)
     return msgEntry;
 }
 
-
-
-async Task OnSlashCommand(SocketSlashCommand cmd)
-{
-
-    var usr = (IGuildUser) cmd.User;
-    usr = (await usr.Guild.GetUsersAsync()).First(x => x.Id == cmd.User.Id) ;
-    if (usr == null) return;
-    if (!usr.GuildPermissions.Administrator)
-    {
-        switch (cmd.UserLocale)
-        {
-            case "ru":
-                await cmd.RespondAsync("У вас должны быть права администратора для того что бы использовать комманды", ephemeral: true);
-                break;
-            default:
-                await cmd.RespondAsync("You must have Administator rights to use this command", ephemeral:true);
-                break;
-        }
-        return;
-    }
-
-    if (cmd.CommandName == Commands.Set_Channel)
-    {
-        var ch = ((IMessageChannel)cmd.Data.Options.First( x=> x.Name == "channel").Value);
-
-        var cfg = await GetConfig(cmd.GuildId ?? 0);
-        cfg.ChannelID = ch.Id;
-        await db.SaveChangesAsync();
-
-        switch (cmd.UserLocale)
-        {
-            case "ru":
-                await cmd.RespondAsync($"Канал {ch.Name} будет ипользоваться как доска почета", ephemeral: true);
-                break;
-            default:
-                await cmd.RespondAsync($"You set channel {ch.Name} as starboard channel", ephemeral: true);
-                break;
-        }
-    }
-
-    if (cmd.CommandName == Commands.Set_Threshold)
-    {
-        var t = Convert.ToInt32(cmd.Data.Options.First(x => x.Name == "count").Value);
-
-        var cfg = await GetConfig(cmd.GuildId ?? 0);
-        cfg.ReactionsThreshold = t;
-        await db.SaveChangesAsync();
-
-        switch (cmd.UserLocale)
-        {
-            case "ru":
-                await cmd.RespondAsync($"Сообщения будут добавлятся на доску почета по достежению {t} {Star_Code}", ephemeral: true);
-                break;
-            default:
-                await cmd.RespondAsync($"Now messages will be sent to starboard once they recieve {t} {Star_Code}", ephemeral: true);
-                break;
-        }
-    }
-}
 
 Task Log(LogMessage msg)
 {
